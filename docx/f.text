@@ -1,0 +1,488 @@
+Act as a Senior Frontend Developer and UI/UX Engineer with 10+ years of professional experience building production-ready SaaS dashboards, AI-powered applications, responsive web apps, and modern design systems.
+
+PROJECT: AI Urban Farming Assistant
+
+PROJECT OVERVIEW:
+Build a complete, polished, responsive AI-powered urban gardening web application. It helps users identify possible plant diseases from uploaded leaf images, receive personalized plant care and watering recommendations, manage their plants, and track plant health over time.
+
+The main demo journey must work:
+1. Add a tomato plant.
+2. Open its plant details.
+3. Upload a tomato leaf image.
+4. Display an AI disease prediction with confidence and uncertainty handling.
+5. Show symptoms and basic treatment/care recommendations.
+6. Display a watering recommendation based on plant type, soil condition, weather, pot size, and sunlight.
+7. Save the diagnosis and care activity.
+8. Show the updated plant health history on the dashboard.
+
+YOUR ROLE:
+Think and work like a senior engineer. Build a cohesive product, not a collection of disconnected screens. Use reusable components, consistent spacing, clean architecture, accessible interactions, realistic states, and maintainable code. Prioritize a working end-to-end application.
+
+TECHNOLOGY:
+- React with Vite
+- TypeScript
+- Tailwind CSS
+- React Router
+- Lucide React icons
+- Recharts for charts
+- React Hook Form and Zod for form validation
+- FastAPI backend integration
+- PostgreSQL database through the backend
+- Fetch or Axios for API calls
+
+If the existing project uses a different established stack, inspect it first and preserve its conventions unless there is a compelling reason to change them. Do not replace existing project files blindly.
+
+DESIGN DIRECTION:
+Create a premium, modern, nature-inspired SaaS dashboard. The visual experience should feel professional, calm, clean, and trustworthy.
+
+Color palette:
+- Primary forest green: #166534
+- Deep green: #14532D
+- Fresh green: #22C55E
+- Soft mint: #DCFCE7
+- Warm off-white background: #F8FAF5
+- White cards: #FFFFFF
+- Main text: #17231C
+- Secondary text: #647067
+- Warning amber: #D97706
+- Error red: #DC2626
+
+Use a clean sans-serif font such as Inter. Use generous whitespace, subtle borders, restrained shadows, rounded 12–16px cards, consistent iconography, clear typography hierarchy, and polished hover/focus states.
+
+Avoid excessive gradients, unnecessary animations, oversized headings, cluttered cards, random colors, and generic template styling.
+
+RESPONSIVE LAYOUT:
+Desktop:
+- Fixed or sticky left sidebar, approximately 250px wide.
+- Main content area with a clear page heading and actions.
+- Optional compact right-side panel for care reminders.
+- Responsive card grids and charts.
+
+Tablet:
+- Collapsible sidebar.
+- Two-column layouts where space allows.
+
+Mobile:
+- Mobile-friendly navigation or drawer.
+- Single-column content.
+- Touch-friendly controls.
+- Full-width forms and image upload.
+- No horizontal overflow.
+- Charts and tables must adapt to narrow screens.
+
+GLOBAL APPLICATION COMPONENTS:
+1. AppLayout
+2. Sidebar
+3. MobileNavigation
+4. Topbar
+5. Breadcrumbs
+6. PageHeader
+7. SearchInput
+8. NotificationButton
+9. UserProfileMenu
+10. PrimaryButton
+11. SecondaryButton
+12. IconButton
+13. StatusBadge
+14. StatCard
+15. PlantCard
+16. EmptyState
+17. LoadingSkeleton
+18. ErrorState
+19. ConfirmationDialog
+20. Toast notifications
+21. Pagination
+22. FormField
+23. SelectField
+24. DatePicker
+25. ResponsiveModal
+26. AccessibleTooltip
+
+SIDEBAR NAVIGATION:
+- Overview
+- My Plants
+- AI Disease Diagnosis
+- Watering & Care
+- Health History
+- Settings
+
+PAGE 1 — OVERVIEW DASHBOARD:
+Create a professional dashboard with:
+- Greeting and current date.
+- “Add New Plant” primary action.
+- Total Plants statistic.
+- Healthy Plants statistic.
+- Plants Needing Attention statistic.
+- Upcoming Care Tasks statistic.
+- My Plants card grid.
+- Recent AI Diagnoses section.
+- Watering Schedule section.
+- Plant Health Trend chart.
+- Recent Activity timeline.
+- Empty state for first-time users.
+
+Each plant card must display:
+- Plant image or placeholder.
+- Plant name.
+- Species.
+- Health status.
+- Last watered date.
+- Next care reminder.
+- Quick action to view details.
+- Menu for edit/delete.
+
+PAGE 2 — MY PLANTS:
+Build:
+- Search plants by name.
+- Filter by species, health status, and location.
+- Grid/list view toggle.
+- Add Plant button.
+- Plant cards with health indicators.
+- Pagination or load more if needed.
+- Helpful empty and no-results states.
+
+ADD PLANT FORM:
+Fields:
+- Plant name (required)
+- Plant species (required)
+- Planting date
+- Growth stage
+- Pot size: Small, Medium, Large, Raised Bed
+- Growing location: Indoor, Balcony, Rooftop, Outdoor
+- Sunlight hours per day
+- Drainage quality
+- Optional plant photo
+- Notes
+
+Use validation, helpful labels, inline error messages, and clear Save and Cancel actions.
+
+PAGE 3 — PLANT DETAILS:
+Create a plant profile page containing:
+- Plant photo and profile details.
+- Current health status.
+- AI Diagnose button.
+- Watering recommendation card.
+- Plant care overview.
+- Last watered date.
+- Soil condition.
+- Recent diagnoses.
+- Health history timeline.
+- Watering history.
+- Edit plant and delete plant actions.
+
+PAGE 4 — AI DISEASE DIAGNOSIS:
+This is the key feature. Make it visually impressive and easy to use.
+
+IMAGE UPLOAD COMPONENT:
+- Drag-and-drop upload zone.
+- Browse files button.
+- JPG, JPEG, PNG support.
+- Maximum file size of 5 MB.
+- Image preview before submission.
+- Replace and remove image actions.
+- Upload progress/loading state.
+- Validation for file format, file size, and unreadable images.
+- Accessible keyboard interaction.
+
+Diagnosis workflow:
+1. Select an existing plant or add a new plant.
+2. Upload a leaf image.
+3. Show a preview and confirmation.
+4. Submit the image to the backend.
+5. Display an animated but restrained analysis/loading state.
+6. Render the actual returned prediction.
+7. Save and display the diagnosis history.
+
+DIAGNOSIS RESULT COMPONENT:
+- Predicted disease name.
+- Confidence percentage.
+- Confidence/probability visual.
+- Severity label only when supported by the backend.
+- Symptoms and explanation.
+- Basic care recommendations.
+- Preventive measures.
+- Monitoring instructions.
+- Date of diagnosis.
+- Uploaded image.
+- “View Plant” action.
+- “Diagnose Another Image” action.
+
+Supported example tomato classes:
+- Healthy
+- Early Blight
+- Late Blight
+- Leaf Mold
+- Septoria Leaf Spot
+- Uncertain / Unsupported
+
+Important AI safety and UX requirements:
+- Show “Possible diagnosis,” not a guaranteed diagnosis.
+- Confidence is model confidence, not proven diagnostic accuracy.
+- If the model confidence is below its configured threshold, show an uncertainty state.
+- Do not invent a prediction when the backend is unavailable.
+- Distinguish actual AI results from sample/demo data.
+- For uncertain results, recommend taking a clearer photo and inspecting the entire plant.
+- Avoid automatically recommending chemical pesticides from an uncertain image.
+
+PAGE 5 — WATERING & CARE:
+Build a personalized care dashboard.
+
+Display:
+- Plant selector.
+- Current weather summary.
+- Temperature.
+- Humidity.
+- Rain forecast.
+- Soil moisture/condition.
+- Watering recommendation.
+- Upcoming care tasks.
+- Watering history.
+- Log Watering button.
+- Mark Task Complete action.
+
+Watering inputs:
+- Plant species
+- Growth stage
+- Pot size
+- Sunlight hours
+- Indoor/outdoor location
+- Soil condition: Wet, Moist, Slightly Dry, Dry
+- Temperature
+- Humidity
+- Rain forecast
+- Drainage quality
+
+Recommendation states:
+- Water now / consider watering.
+- Check soil first.
+- Wait and reassess.
+- Check drainage.
+- Weather-adjusted soil check reminder.
+
+Use transparent, rule-based logic for the first version. Soil condition and drainage should be important inputs. Weather should influence the frequency of checks, not automatically dictate watering. Never imply that a weather forecast is a direct soil moisture measurement.
+
+LOG WATERING MODAL:
+- Plant name.
+- Date and time.
+- Water amount in milliliters (optional).
+- Soil condition.
+- Notes.
+- Save action.
+- Success feedback.
+
+PAGE 6 — HEALTH HISTORY:
+Build:
+- Plant filter.
+- Date-range filter.
+- Diagnosis history timeline.
+- Previous uploaded images.
+- Predicted disease and confidence.
+- Health status changes.
+- Watering and care events.
+- Trend chart.
+- Empty state when no history exists.
+
+PAGE 7 — SETTINGS:
+Include:
+- User profile.
+- Preferred units.
+- Notification preferences.
+- Reminder preferences.
+- Theme preference if feasible.
+- Account actions if authentication exists.
+
+CHARTS:
+Use Recharts for:
+- Plant health trend over time.
+- Watering activity over time.
+- Diagnosis distribution.
+
+Charts must have responsive containers, accessible labels, tooltips, sensible empty states, and clear date ranges. Do not fabricate analytics from missing records.
+
+BACKEND INTEGRATION:
+Assume these REST API endpoints:
+
+GET /api/plants
+POST /api/plants
+GET /api/plants/{id}
+PATCH /api/plants/{id}
+DELETE /api/plants/{id}
+POST /api/plants/{id}/diagnose
+GET /api/plants/{id}/diagnoses
+POST /api/plants/{id}/water
+GET /api/plants/{id}/care
+POST /api/plants/{id}/health
+
+Diagnosis uploads must use multipart/form-data.
+
+Create:
+- Central API client.
+- Typed request/response interfaces.
+- Reusable API hooks or service functions.
+- Loading, success, empty, and error states.
+- Error handling for network failures and invalid responses.
+- Environment variable for backend base URL.
+- Correct handling of HTTP status codes.
+
+Do not hardcode API secrets in frontend code.
+
+DATA MODELS:
+Plant:
+id, name, species, planted_at, growth_stage, pot_size, location, sunlight_hours, drainage, health_status, image_url, notes.
+
+Diagnosis:
+id, plant_id, image_url, predicted_class, confidence, status, symptoms, recommendations, created_at.
+
+WateringLog:
+id, plant_id, watered_at, amount_ml, soil_condition, notes.
+
+CareRecommendation:
+id, plant_id, type, message, due_at, status, created_at.
+
+HealthLog:
+id, plant_id, status, notes, recorded_at.
+
+Use the actual backend schema if it differs. Keep frontend types aligned with the API.
+
+REUSABLE COMPONENT ARCHITECTURE:
+Organize components by feature instead of placing the entire application in one file.
+
+Suggested structure:
+
+src/
+  app/
+    App.tsx
+    router.tsx
+  components/
+    layout/
+      AppLayout.tsx
+      Sidebar.tsx
+      Topbar.tsx
+      MobileNavigation.tsx
+    ui/
+      Button.tsx
+      Card.tsx
+      Badge.tsx
+      Modal.tsx
+      Input.tsx
+      Select.tsx
+      Skeleton.tsx
+      EmptyState.tsx
+      ErrorState.tsx
+    plants/
+      PlantCard.tsx
+      PlantForm.tsx
+      PlantGrid.tsx
+      PlantDetails.tsx
+    diagnosis/
+      ImageUploader.tsx
+      DiagnosisProgress.tsx
+      DiagnosisResult.tsx
+      ConfidenceIndicator.tsx
+    care/
+      WateringCard.tsx
+      WateringForm.tsx
+      CareTaskList.tsx
+    dashboard/
+      StatCard.tsx
+      PlantHealthChart.tsx
+      RecentActivity.tsx
+    history/
+      HealthTimeline.tsx
+      DiagnosisHistory.tsx
+  pages/
+    DashboardPage.tsx
+    PlantsPage.tsx
+    PlantDetailsPage.tsx
+    DiagnosisPage.tsx
+    CarePage.tsx
+    HistoryPage.tsx
+    SettingsPage.tsx
+    NotFoundPage.tsx
+  services/
+    api.ts
+    plants.ts
+    diagnosis.ts
+    care.ts
+    history.ts
+  hooks/
+  types/
+  utils/
+  assets/
+  index.css
+  main.tsx
+
+Adapt the folder structure to the existing project and avoid unnecessary files.
+
+UI/UX QUALITY REQUIREMENTS:
+- Consistent spacing and typography.
+- Strong visual hierarchy.
+- Clear primary and secondary actions.
+- Accessible color contrast.
+- Visible keyboard focus.
+- Semantic HTML.
+- Proper form labels.
+- Accessible dialogs and dropdowns.
+- Meaningful alt text.
+- Responsive behavior across mobile, tablet, and desktop.
+- Clear loading, empty, success, and failure states.
+- Confirmation before destructive actions.
+- No dead buttons or fake interactions.
+- Avoid excessive animations.
+- Respect reduced-motion preferences.
+- Use realistic demo data only when clearly labeled.
+- Use local assets or reliable image sources; do not rely on broken image URLs.
+
+FUNCTIONAL REQUIREMENTS:
+- Add, edit, view, and delete plants.
+- Search and filter plants.
+- Upload and preview leaf images.
+- Call the real diagnosis endpoint.
+- Show actual model results.
+- Save diagnosis history.
+- Display personalized care recommendations.
+- Log watering events.
+- Update dashboard statistics from stored data.
+- Show errors when the backend is unavailable.
+- Preserve data using the backend database.
+- Ensure all navigation routes work.
+
+TESTING:
+- Test form validation.
+- Test image format and size validation.
+- Test empty dashboard.
+- Test network errors.
+- Test diagnosis success and uncertainty.
+- Test adding and editing plants.
+- Test watering log submission.
+- Test responsive layouts.
+- Test keyboard accessibility.
+- Test that saved data appears after page reload.
+
+DELIVERABLES:
+1. A complete, working React application.
+2. All required pages and reusable components.
+3. A consistent design system.
+4. Responsive layouts.
+5. Typed API integration.
+6. Functional plant management.
+7. Functional image diagnosis integration.
+8. Watering and care interface.
+9. Health history and dashboard.
+10. Setup instructions and environment variable example.
+11. A README with installation and run commands.
+12. A list of any backend endpoints or model functionality that still needs implementation.
+
+IMPLEMENTATION INSTRUCTIONS:
+First inspect the existing repository, package.json, and project structure. Then create a short implementation plan. Build the application in logical stages, ensuring the project runs after each stage. Reuse installed dependencies where possible. Do not stop at a static mockup: connect every major interaction to application state or the backend.
+
+If the backend or trained AI model is not available, create a clearly labeled demo mode with deterministic sample responses and a clean service interface that can later be replaced by the real API. Never present mock predictions as real AI results.
+
+Before finishing:
+- Run the available build and lint commands.
+- Fix TypeScript errors and broken imports.
+- Check all routes and main interactions.
+- Verify mobile and desktop layouts.
+- Summarize files created, features implemented, setup steps, and remaining backend requirements.
+
+Start by inspecting the project and implementing the foundation, design system, application layout, and dashboard. Then implement plant management, diagnosis, watering, and history in that order.

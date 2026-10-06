@@ -1,0 +1,736 @@
+Act as a Senior Backend Developer, Backend Architect, and AI Integration Engineer with 10+ years of professional experience building secure, scalable, maintainable REST APIs, AI-powered applications, database systems, and production-ready services.
+
+PROJECT NAME:
+AI Urban Farming Assistant
+
+PROJECT OBJECTIVE:
+Build a complete backend for an AI-powered urban gardening application. Users must be able to register plants, upload leaf images, identify possible plant diseases, receive treatment recommendations, obtain personalized watering guidance based on plant conditions and weather, and track plant health over time.
+
+The backend must support this complete demo:
+1. Create or select a user.
+2. Add a tomato plant.
+3. Upload a tomato leaf image.
+4. Validate and securely store the image.
+5. Run an actual plant disease classification model.
+6. Return the predicted class, model confidence, and uncertainty status.
+7. Return relevant disease symptoms and basic care recommendations.
+8. Generate watering guidance based on plant details, soil condition, and weather.
+9. Save the diagnosis and care activities.
+10. Return updated plant information and health history to the frontend.
+
+YOUR ROLE:
+Think like a senior backend engineer. Build a working, modular backend, not a collection of disconnected endpoints. Follow separation of concerns, SOLID principles where appropriate, clear data contracts, robust error handling, security best practices, testability, and maintainable code.
+
+Do not stop at architecture documentation or pseudocode. Inspect the existing repository and implement the actual backend.
+
+TECHNOLOGY STACK:
+- Python 3.12+
+- FastAPI
+- Pydantic v2
+- SQLAlchemy 2.x
+- Alembic migrations
+- PostgreSQL
+- PostgreSQL UUID primary keys
+- TensorFlow/Keras for disease model inference
+- Pillow and optionally OpenCV for image processing
+- HTTPX for external HTTP requests
+- Pytest for automated tests
+- Ruff for linting and formatting
+- Docker and Docker Compose
+- Uvicorn as ASGI server
+
+Use compatible stable dependency versions. Inspect existing project files before changing dependencies. If TensorFlow is incompatible with the chosen runtime, explain the issue and select a compatible version rather than silently breaking the environment.
+
+ARCHITECTURE:
+Use a modular, layered architecture:
+
+API / ROUTER LAYER
+- Handles HTTP requests and responses.
+- Validates request parameters.
+- Enforces authentication and authorization.
+- Calls service functions.
+- Returns documented response schemas.
+
+SERVICE LAYER
+- Contains business logic.
+- Coordinates database operations, AI inference, weather, and recommendations.
+- Avoids embedding business rules in route handlers.
+
+REPOSITORY / DATA ACCESS LAYER
+- Handles database queries and persistence.
+- Uses SQLAlchemy sessions.
+- Keeps query logic separate from business logic.
+
+AI LAYER
+- Image validation and preprocessing.
+- Model loading and inference.
+- Class mapping and confidence processing.
+- Uncertainty handling.
+- Prediction response generation.
+
+INTEGRATION LAYER
+- Weather API client.
+- File storage abstraction.
+- AI model service.
+- Optional notification service.
+
+CORE MODULES TO IMPLEMENT:
+
+1. AUTHENTICATION AND USER MANAGEMENT
+Implement:
+- User registration.
+- User login.
+- Logout or token invalidation strategy.
+- Get current user.
+- Update profile.
+- Password hashing using Argon2 or another appropriate secure password hashing library.
+- JWT access tokens with expiration.
+- Refresh-token strategy if implemented.
+- Authentication dependencies.
+- Ownership checks for every user-owned resource.
+
+Endpoints:
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
+POST /api/v1/auth/logout
+GET /api/v1/users/me
+PATCH /api/v1/users/me
+
+Use Pydantic schemas. Never return password hashes, tokens, or secrets in ordinary profile responses.
+
+2. PLANT MANAGEMENT
+Users can create and manage multiple plants.
+
+Plant fields:
+- id: UUID
+- user_id: UUID foreign key
+- name: string
+- species: string
+- planted_at: optional date
+- growth_stage: optional enum
+- pot_size: optional enum
+- growing_location: optional enum
+- sunlight_hours: optional float
+- drainage_quality: optional enum
+- image_url: optional string
+- notes: optional string
+- health_status: enum
+- created_at
+- updated_at
+
+Implement:
+- Create plant.
+- List user's plants.
+- Retrieve plant details.
+- Update plant.
+- Delete plant.
+- Search by plant name.
+- Filter by species and health status.
+- Pagination and stable sorting.
+
+Endpoints:
+POST /api/v1/plants
+GET /api/v1/plants
+GET /api/v1/plants/{plant_id}
+PATCH /api/v1/plants/{plant_id}
+DELETE /api/v1/plants/{plant_id}
+
+Validate that users can access only their own plants. Use appropriate 404/403 behavior without leaking other users' data.
+
+3. IMAGE UPLOAD AND STORAGE
+Implement a dedicated image storage service.
+
+Requirements:
+- Accept JPG, JPEG, and PNG.
+- Maximum upload size: 5 MB initially.
+- Validate actual image content, not just filename extensions or client MIME types.
+- Reject corrupted or unsupported images.
+- Convert accepted images to RGB for inference.
+- Apply safe image decoding and sensible dimension limits.
+- Generate unique server-side storage names.
+- Prevent path traversal.
+- Do not trust user-provided filenames.
+- Avoid publicly exposing private images.
+- Store image metadata and storage keys in the database.
+- Use local storage for development and an object-storage-compatible abstraction for production.
+- Do not store large image binaries directly in ordinary PostgreSQL rows.
+
+Create an ImageStorageService interface with local development implementation. Keep storage replaceable without changing API business logic.
+
+4. AI PLANT DISEASE DETECTION
+Create a dedicated DiseaseDetectionService.
+
+Recommended initial model:
+- MobileNetV2 or another validated compatible image classifier.
+- TensorFlow/Keras.
+- Input size: 224 x 224 RGB.
+- Model preprocessing must exactly match the selected pretrained model.
+- Inference batch size: 1 for a single uploaded image.
+- Configurable model path.
+- Configurable class mapping.
+- Configurable confidence threshold, initially 0.70.
+- Model loaded once at application startup or through a managed lazy-loading strategy, not once per request.
+
+Initial tomato classes:
+- healthy
+- early_blight
+- late_blight
+- leaf_mold
+- septoria_leaf_spot
+
+Add explicit uncertain/unsupported result handling. Do not pretend that adding an output label automatically gives the model open-set recognition. For unsupported conditions, implement practical safeguards and document limitations.
+
+Prediction response fields:
+- diagnosis_id
+- plant_id
+- predicted_class
+- confidence
+- status
+- image reference
+- symptoms
+- recommendations
+- created_at
+- model_version
+
+Important:
+- Return the actual model output.
+- Never fabricate predictions.
+- Never treat model confidence as guaranteed diagnostic accuracy.
+- Return an uncertain result when confidence is insufficient.
+- Handle malformed images and inference errors gracefully.
+- Do not block the entire API if model loading fails.
+- Expose model readiness through health checks.
+- Keep disease classes and model version configurable.
+
+Endpoints:
+POST /api/v1/plants/{plant_id}/diagnoses
+GET /api/v1/plants/{plant_id}/diagnoses
+GET /api/v1/diagnoses/{diagnosis_id}
+
+Use multipart/form-data for image upload. Authenticate and authorize the plant owner before accepting or processing a diagnosis.
+
+5. DISEASE INFORMATION AND TREATMENT CATALOGUE
+Create a disease catalogue independent of the ML model.
+
+Fields:
+- id
+- disease_code
+- common_name
+- scientific_name, if known
+- supported_crop
+- symptoms
+- general_care
+- preventive_measures
+- monitoring_guidance
+- safety_notes
+- updated_at
+
+Include curated guidance for the supported tomato conditions.
+
+Implement:
+GET /api/v1/diseases
+GET /api/v1/diseases/{disease_code}
+
+Map a model prediction to catalogue guidance. If a disease is unknown or confidence is low, return cautious general advice rather than an invented treatment.
+
+Do not automatically prescribe chemical pesticides. Any product-specific guidance must be based on reliable, locally applicable information and must include appropriate label and safety limitations.
+
+6. WATERING RECOMMENDATION ENGINE
+Implement a deterministic, explainable rule-based watering engine for the POC.
+
+Inputs:
+- plant species
+- growth stage
+- pot size
+- growing location
+- sunlight hours
+- drainage quality
+- soil condition
+- temperature
+- humidity
+- rainfall forecast
+- forecast period
+- optional soil moisture sensor reading
+
+Soil condition enum:
+- wet
+- moist
+- slightly_dry
+- dry
+- unknown
+
+Recommendation output:
+- recommendation_id
+- plant_id
+- action
+- summary
+- explanation
+- urgency
+- suggested_recheck_at
+- input_conditions
+- created_at
+
+Actions:
+- water_consider
+- check_soil
+- wait_and_reassess
+- check_drainage
+- insufficient_information
+
+Business rules:
+- Wet soil: do not recommend additional watering solely based on temperature.
+- Moist soil: usually wait and reassess.
+- Dry root zone: consider watering according to crop and growth stage.
+- Hot or sunny weather: may increase soil-check frequency.
+- Rain forecast: account for actual rainfall, outdoor exposure, and soil moisture.
+- Poor drainage: warn about waterlogging risk.
+- Unknown soil condition: ask the user to inspect soil or provide sensor data.
+- Do not equate humidity with soil moisture.
+- Do not present forecast-based estimates as measured soil conditions.
+
+Create a WateringRecommendationService with separately testable rule functions.
+
+Endpoints:
+POST /api/v1/plants/{plant_id}/care/watering-recommendation
+GET /api/v1/plants/{plant_id}/care
+GET /api/v1/plants/{plant_id}/care/watering-recommendations
+
+Persist recommendation history where useful. Clearly distinguish a generated recommendation from a completed watering event.
+
+7. WEATHER INTEGRATION
+Create a WeatherService abstraction.
+
+Requirements:
+- Use an external weather API through HTTPX.
+- Keep provider credentials in environment variables.
+- Accept city or coordinates, preferably coordinates for accuracy.
+- Retrieve current temperature, humidity, precipitation probability, and forecast data where available.
+- Include timeout, retry, and error handling.
+- Cache weather responses for a configurable short period.
+- Handle API rate limits and provider outages.
+- Never fabricate live weather data when the provider fails.
+- Return a clear unavailable state and still allow soil-based recommendations.
+- Use timestamps and timezone-aware datetimes.
+- Document units, such as Celsius, percentage humidity, and millimeters of rainfall.
+
+Weather endpoint:
+GET /api/v1/weather
+
+Support query parameters for latitude, longitude, and forecast horizon. Validate geographic coordinates.
+
+8. WATERING LOGS
+Implement:
+- Record a watering event.
+- List watering events for a plant.
+- Update or delete an event if needed.
+- Store amount in milliliters, optional.
+- Store soil condition and notes.
+- Track event timestamp.
+- Associate every event with the plant.
+
+Endpoints:
+POST /api/v1/plants/{plant_id}/watering-logs
+GET /api/v1/plants/{plant_id}/watering-logs
+PATCH /api/v1/watering-logs/{log_id}
+DELETE /api/v1/watering-logs/{log_id}
+
+Validate positive amounts and user ownership.
+
+9. HEALTH TRACKING
+Allow users to record basic plant health observations independently of model predictions.
+
+Health statuses:
+- healthy
+- needs_attention
+- under_observation
+- recovered
+- unknown
+
+Fields:
+- id
+- plant_id
+- status
+- notes
+- recorded_at
+- optional image reference
+
+Endpoints:
+POST /api/v1/plants/{plant_id}/health-logs
+GET /api/v1/plants/{plant_id}/health-logs
+PATCH /api/v1/health-logs/{log_id}
+DELETE /api/v1/health-logs/{log_id}
+
+Keep user-reported health status separate from the AI prediction. Do not automatically mark a plant recovered because of one healthy-looking image.
+
+10. CARE TASKS AND REMINDERS
+Implement:
+- Create care task.
+- List upcoming tasks.
+- Mark task completed.
+- Cancel or update task.
+- Optional recurring schedule support.
+- Link tasks to plants.
+- Track due date and completion time.
+
+Task types:
+- soil_check
+- watering
+- inspect_leaves
+- general_care
+
+Endpoints:
+POST /api/v1/plants/{plant_id}/care-tasks
+GET /api/v1/care-tasks
+PATCH /api/v1/care-tasks/{task_id}
+DELETE /api/v1/care-tasks/{task_id}
+
+Do not send actual email or push notifications unless a provider is configured. Implement reminders as persisted tasks first.
+
+11. DASHBOARD AND ANALYTICS API
+Provide aggregated data for the frontend dashboard.
+
+Endpoint:
+GET /api/v1/dashboard/summary
+
+Return:
+- total_plants
+- healthy_plants
+- plants_needing_attention
+- upcoming_care_tasks
+- recent_diagnoses
+- recent_activity
+- plant_health_trend
+- watering_activity
+
+All counts and charts must be derived from the authenticated user's stored records. Use consistent date filters and timezone-aware date handling. Return empty arrays and zero counts when the user has no records. Do not generate fake analytics.
+
+12. DATABASE MODELS
+Implement SQLAlchemy models and Alembic migrations.
+
+Tables:
+- users
+- plants
+- diagnoses
+- diseases
+- watering_logs
+- health_logs
+- care_recommendations
+- care_tasks
+- weather_cache, if caching in the database
+- refresh_tokens, if refresh tokens are implemented
+
+Use:
+- UUID primary keys.
+- Foreign keys and appropriate delete behavior.
+- Created and updated timestamps.
+- Appropriate indexes.
+- Unique constraints where required.
+- Enum or validated string fields.
+- Decimal or integer types for quantities as appropriate.
+- JSON/JSONB for structured metadata only where justified.
+
+Use Alembic migrations. Do not rely on create_all as the production migration strategy.
+
+13. API CONTRACTS AND VALIDATION
+Use Pydantic request and response schemas for every endpoint.
+
+Requirements:
+- Separate create, update, and response schemas.
+- Reject unexpected or invalid values where appropriate.
+- Validate enum fields and numeric ranges.
+- Use consistent pagination.
+- Return correct HTTP status codes.
+- Generate OpenAPI documentation.
+- Use a consistent error response format.
+- Do not expose internal stack traces to clients.
+- Include request IDs or correlation IDs for debugging.
+
+Suggested error structure:
+{
+  "error": {
+    "code": "INVALID_IMAGE",
+    "message": "The uploaded image could not be processed.",
+    "request_id": "..."
+  }
+}
+
+Use 201 for successful creation, 200 for successful retrieval/update, 204 where appropriate for deletion, 401 for unauthenticated requests, 403 or 404 for unauthorized resources according to the chosen policy, 422 for validation errors, 429 for rate limiting, and appropriate 5xx errors for service failures.
+
+14. SECURITY REQUIREMENTS
+Implement:
+- Password hashing.
+- JWT verification and expiration.
+- Ownership checks on all user-owned records.
+- Environment-based secrets.
+- Input validation.
+- Upload size and content validation.
+- Safe file naming.
+- CORS restricted to configured frontend origins.
+- Rate limiting for login and image diagnosis.
+- SQL injection protection through ORM parameterization.
+- Safe logging that excludes passwords, tokens, and sensitive data.
+- No arbitrary filesystem access.
+- No public access to private uploaded images.
+- Dependency vulnerability checks where tooling is available.
+
+Do not hardcode secrets or commit .env files. Provide a .env.example containing placeholders only.
+
+15. PERFORMANCE AND RELIABILITY
+- Use SQLAlchemy connection pooling.
+- Use pagination for list endpoints.
+- Avoid N+1 database queries.
+- Load the ML model once per worker.
+- Configure inference concurrency appropriately.
+- Use request timeouts for external services.
+- Add limited retries only for transient failures.
+- Avoid retrying non-idempotent operations blindly.
+- Keep image inference separate from unrelated request logic.
+- Consider a task queue only if asynchronous processing is actually required.
+- Ensure model failure does not break plant management or watering endpoints.
+- Avoid unnecessary microservices for this POC.
+
+16. TESTING
+Use Pytest and FastAPI TestClient or HTTPX.
+
+Write tests for:
+- User registration and login.
+- Authentication and ownership enforcement.
+- Plant creation, update, retrieval, and deletion.
+- Pagination and filters.
+- Valid image upload.
+- Invalid MIME type and file extension.
+- Oversized image.
+- Corrupted image.
+- AI prediction response schema.
+- Low-confidence uncertainty handling.
+- Model unavailable behavior.
+- Disease catalogue lookup.
+- Watering rules for wet, moist, dry, and unknown soil.
+- Hot weather and rain conditions.
+- Weather provider timeout and error handling.
+- Watering logs.
+- Health logs.
+- Care tasks.
+- Dashboard aggregation.
+- Database constraints.
+- Error response consistency.
+
+Use fixtures and isolated test data. Mock external weather requests. Use a lightweight fake model in unit tests, but separately document how to test actual model inference.
+
+17. HEALTH CHECKS AND OBSERVABILITY
+Implement:
+GET /health
+GET /ready
+
+Health endpoint should report basic process health.
+Readiness should verify critical dependencies such as database connectivity and model readiness according to the selected policy.
+
+Add:
+- Structured application logging.
+- Request correlation IDs.
+- Error logging without sensitive information.
+- Database and model readiness details.
+- Appropriate startup and shutdown lifecycle handling.
+
+Do not expose secrets, filesystem paths, or sensitive internals through public health endpoints.
+
+18. PROJECT FOLDER STRUCTURE
+Use a clean structure similar to:
+
+backend/
+  app/
+    main.py
+    core/
+      config.py
+      security.py
+      logging.py
+      exceptions.py
+    api/
+      dependencies.py
+      router.py
+      v1/
+        auth.py
+        users.py
+        plants.py
+        diagnoses.py
+        diseases.py
+        watering.py
+        health.py
+        care_tasks.py
+        weather.py
+        dashboard.py
+    models/
+      user.py
+      plant.py
+      diagnosis.py
+      disease.py
+      watering_log.py
+      health_log.py
+      care_task.py
+      care_recommendation.py
+    schemas/
+      auth.py
+      user.py
+      plant.py
+      diagnosis.py
+      disease.py
+      watering.py
+      health.py
+      care_task.py
+      weather.py
+      dashboard.py
+    services/
+      auth_service.py
+      plant_service.py
+      diagnosis_service.py
+      disease_detection_service.py
+      image_processing_service.py
+      image_storage_service.py
+      watering_service.py
+      care_service.py
+      weather_service.py
+      dashboard_service.py
+    repositories/
+      user_repository.py
+      plant_repository.py
+      diagnosis_repository.py
+      care_repository.py
+    ml/
+      model_loader.py
+      preprocessing.py
+      inference.py
+      class_mapping.py
+    data/
+      disease_catalogue.py
+    db/
+      session.py
+      base.py
+    utils/
+      pagination.py
+      datetime.py
+  migrations/
+  tests/
+    unit/
+    integration/
+  scripts/
+  Dockerfile
+  docker-compose.yml
+  alembic.ini
+  requirements.txt or pyproject.toml
+  .env.example
+  .gitignore
+  README.md
+
+Adjust this structure when justified. Avoid empty modules and unnecessary abstraction. Keep the project simple enough for a hackathon while preserving clear boundaries.
+
+19. CONFIGURATION
+Create a typed configuration module using environment variables.
+
+Include placeholders for:
+- APP_NAME
+- APP_ENV
+- DEBUG
+- API_V1_PREFIX
+- DATABASE_URL
+- JWT_SECRET_KEY
+- JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+- JWT_REFRESH_TOKEN_EXPIRE_DAYS, if applicable
+- CORS_ORIGINS
+- UPLOAD_DIR
+- MAX_UPLOAD_SIZE_MB
+- ML_MODEL_PATH
+- ML_MODEL_VERSION
+- ML_CONFIDENCE_THRESHOLD
+- WEATHER_API_KEY
+- WEATHER_API_BASE_URL
+- WEATHER_CACHE_TTL_SECONDS
+- LOG_LEVEL
+
+Validate required production settings at startup. Never use a known hardcoded JWT secret in production. Provide sensible local development defaults only for non-sensitive settings.
+
+20. DOCKER AND DEPLOYMENT
+Provide:
+- Backend Dockerfile.
+- Docker Compose configuration.
+- PostgreSQL service.
+- Persistent database volume.
+- Environment configuration.
+- Health checks.
+- Alembic migration command.
+- Startup and development commands.
+- Production deployment instructions.
+
+Do not bake secrets into Docker images. Keep the model artifact configurable and document how it is supplied to the deployment environment.
+
+21. DOCUMENTATION
+Write a detailed README containing:
+- Project overview.
+- Architecture.
+- Technology stack.
+- Prerequisites.
+- Installation instructions.
+- Environment configuration.
+- Database setup.
+- Migration commands.
+- Model installation and configuration.
+- How to run the backend.
+- API documentation URL.
+- API endpoint summary.
+- Example curl requests.
+- How to run tests.
+- Docker instructions.
+- Deployment instructions.
+- Known limitations.
+- How to connect the React frontend.
+
+22. IMPLEMENTATION PROCESS
+Work in stages:
+
+Stage 1: Inspect the repository and existing frontend API contract.
+Stage 2: Define architecture, data models, enums, and API schemas.
+Stage 3: Set up FastAPI, configuration, database, and migrations.
+Stage 4: Implement authentication and plant management.
+Stage 5: Implement secure image upload and AI inference.
+Stage 6: Implement disease catalogue and recommendations.
+Stage 7: Implement watering engine and weather integration.
+Stage 8: Implement logs, care tasks, and health history.
+Stage 9: Implement dashboard aggregation.
+Stage 10: Add tests, Docker, health checks, and documentation.
+
+After each stage, run relevant tests and ensure imports and migrations remain valid.
+
+23. ACCEPTANCE CRITERIA
+The project is complete when:
+- The backend starts successfully.
+- Database migrations apply successfully.
+- The user can register and authenticate.
+- A user can add, view, edit, and delete their own plants.
+- A tomato leaf image can be uploaded and validated.
+- A configured actual ML model returns a prediction.
+- Low-confidence or unavailable model results are handled honestly.
+- Disease care recommendations are returned from a curated catalogue.
+- Watering guidance responds to soil, plant, and weather inputs.
+- Weather provider failure is handled gracefully.
+- Diagnosis, watering, and health records persist.
+- Dashboard statistics reflect stored records.
+- Unauthorized cross-user access is blocked.
+- Automated tests cover the important flows.
+- API documentation is available.
+- Docker setup and README instructions work.
+
+If the trained model, weather API key, or frontend is unavailable, implement clean interfaces and clearly documented configuration requirements. Provide a demo/test mode only when explicitly labeled. Never represent mock AI predictions or mock weather as real results.
+
+FINAL INSTRUCTIONS:
+First inspect the repository. Then provide a short implementation plan and proceed to create the actual backend files. Do not merely explain what should be built.
+
+Prefer a working, tested, integrated backend over unnecessary complexity. Do not claim tests passed unless you actually ran them. At the end, report:
+1. Files created or modified.
+2. Features implemented.
+3. Database migrations created.
+4. Tests executed and their results.
+5. Commands to run locally.
+6. Environment variables that must be configured.
+7. Remaining integration work or limitations.
+
+Begin by inspecting the current project structure and existing frontend API requirements.

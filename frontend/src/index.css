@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #166534;
+    --color-primary-dark: #14532D;
+    --color-secondary: #22C55E;
+    --color-background: #F8FAF5;
+    --color-surface: #FFFFFF;
+    --color-text-main: #17231C;
+    --color-text-muted: #647067;
+  }
+  
+  html, body {
+    @apply h-full w-full m-0 p-0;
+  }
+  
+  #root {
+    @apply h-full w-full;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-forest-green hover:bg-forest-deep text-white px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-forest-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-main-text border border-gray-200 px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-forest-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
+  }
+  .input-field {
+    @apply w-full rounded-lg border-gray-300 shadow-sm focus:outline-none focus:border-forest-green focus:ring-2 focus:ring-forest-green/20 sm:text-sm px-3 py-2 border transition-all duration-200;
+  }
+}

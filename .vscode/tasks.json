@@ -1,0 +1,152 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "frontend-build",
+			"type": "shell",
+			"command": "cd frontend && npm run build",
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			]
+		},
+		{
+			"label": "frontend-build2",
+			"type": "shell",
+			"command": "cmd /C \"cd /d d:\\leaflogic\\frontend && npm run build\"",
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			]
+		},
+		{
+			"label": "frontend-build3",
+			"type": "shell",
+			"command": "cmd /C \"cd /d d:\\leaflogic\\frontend; npm run build\"",
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			]
+		},
+		{
+			"label": "frontend-build4",
+			"type": "shell",
+			"command": "Set-Location \"d:\\leaflogic\\frontend\"; npm run build",
+			"isBackground": false
+		},
+		{
+			"label": "backend-smoke",
+			"type": "shell",
+			"command": "Set-Location \"d:\\leaflogic\\backend\"; $env:PYTHONPATH = \".\"; python -c \"from fastapi.testclient import TestClient; from app.main import app; c = TestClient(app); print(c.get('/health').status_code); print(c.get('/ready').status_code)\"",
+			"isBackground": false
+		},
+		{
+			"label": "backend-smoke2",
+			"type": "shell",
+			"command": "Set-Location 'd:\\leaflogic\\backend'; $env:PYTHONPATH='.'; python -c 'from fastapi.testclient import TestClient; from app.main import app; c = TestClient(app); print(c.get(\"/health\").status_code); print(c.get(\"/ready\").status_code)'",
+			"isBackground": false
+		},
+		{
+			"label": "backend-smoke3",
+			"type": "shell",
+			"command": "Set-Location 'd:\\leaflogic\\backend'; $env:PYTHONPATH='.'; & 'C:\\Users\\Study\\AppData\\Local\\Programs\\Python\\Python313\\python.exe' -c 'from fastapi.testclient import TestClient; from app.main import app; c = TestClient(app); print(c.get(\"/health\").status_code); print(c.get(\"/ready\").status_code)'",
+			"isBackground": false
+		},
+		{
+			"label": "py-check",
+			"type": "shell",
+			"command": "& 'C:\\Users\\Study\\AppData\\Local\\Programs\\Python\\Python313\\python.exe' -V",
+			"isBackground": false
+		},
+		{
+			"label": "backend-smoke4",
+			"type": "shell",
+			"command": "Set-Location 'd:\\leaflogic\\backend'; $env:PYTHONPATH='.'; & 'd:\\leaflogic\\backend\\.venv\\Scripts\\python.exe' -c \"from fastapi.testclient import TestClient; from app.main import app; c = TestClient(app); print(c.get('/health').status_code); print(c.get('/ready').status_code)\"",
+			"isBackground": false
+		},
+		{
+			"label": "backend-smoke5",
+			"type": "shell",
+			"command": "Set-Location 'd:\\leaflogic\\backend'; $env:PYTHONPATH='.'; @'\nfrom fastapi.testclient import TestClient\nfrom app.main import app\nclient = TestClient(app)\nprint(client.get('/health').status_code)\nprint(client.get('/ready').status_code)\n'@ | & 'd:\\leaflogic\\backend\\.venv\\Scripts\\python.exe' -",
+			"isBackground": false
+		},
+		{
+			"label": "backend-auth-check",
+			"type": "shell",
+			"command": "Set-Location 'd:\\leaflogic\\backend'; $env:PYTHONPATH='.'; @'\nfrom app.api.v1.auth import register, login, normalize_email\nfrom app.schemas.user import UserCreate\n\nclass FakeCollection:\n    def __init__(self):\n        self.docs = []\n    def insert_one(self, doc):\n        self.docs.append(doc)\n    def find_one(self, query):\n        if isinstance(query, dict) and 'email' in query and not isinstance(query['email'], dict):\n            for doc in self.docs:\n                if doc.get('email') == query['email']:\n                    return doc\n            return None\n        return None\n    def find(self, query):\n        return [d for d in self.docs if 'email' in d]\n\nclass FakeDB:\n    def __init__(self):\n        self.users = FakeCollection()\n\ndb = FakeDB()\nuser = register(user_in=UserCreate(email='Alice@example.com', password='Secret123', full_name='Alice'), db=db)\nprint(user['email'])\nform = type('Form', (), {'username': 'alice@example.com', 'password': 'Secret123'})()\nprint(login(db=db, form_data=form)['token_type'])\nprint(normalize_email('  Alice@Example.com  '))\n'@ | & 'd:\\leaflogic\\backend\\.venv\\Scripts\\python.exe' -",
+			"isBackground": false
+		},
+		{
+			"label": "backend-auth-check2",
+			"type": "shell",
+			"command": "Set-Location 'd:\\leaflogic\\backend'; $env:PYTHONPATH='.'; $script = @'\nfrom app.api.v1.auth import register, login, normalize_email\nfrom app.schemas.user import UserCreate\n\nclass FakeCollection:\n    def __init__(self):\n        self.docs = []\n    def insert_one(self, doc):\n        self.docs.append(doc)\n    def find_one(self, query):\n        if isinstance(query, dict) and 'email' in query and not isinstance(query['email'], dict):\n            for doc in self.docs:\n                if doc.get('email') == query['email']:\n                    return doc\n            return None\n        return None\n    def find(self, query):\n        return [d for d in self.docs if 'email' in d]\n\nclass FakeDB:\n    def __init__(self):\n        self.users = FakeCollection()\n\ndb = FakeDB()\nuser = register(user_in=UserCreate(email='Alice@example.com', password='Secret123', full_name='Alice'), db=db)\nprint(user['email'])\nform = type('Form', (), {'username': 'alice@example.com', 'password': 'Secret123'})()\nprint(login(db=db, form_data=form)['token_type'])\nprint(normalize_email('  Alice@Example.com  '))\n'@; & 'd:\\leaflogic\\backend\\.venv\\Scripts\\python.exe' -c $script",
+			"isBackground": false
+		},
+		{
+			"label": "backend-compile",
+			"type": "shell",
+			"command": "Set-Location 'd:\\leaflogic\\backend'; & 'd:\\leaflogic\\backend\\.venv\\Scripts\\python.exe' -m py_compile app/api/v1/auth.py migrate_sqlite_to_mongo.py",
+			"isBackground": false
+		},
+		{
+			"label": "check-git-connection",
+			"type": "shell",
+			"command": "git status --short --branch; git remote -v",
+			"isBackground": false
+		},
+		{
+			"label": "check-git-install-options",
+			"type": "shell",
+			"command": "Get-Command git,gh,winget -ErrorAction SilentlyContinue | Select-Object Name,Source; Write-Output \"PATH=$env:PATH\"; Test-Path 'C:\\Program Files\\Git\\cmd\\git.exe'; Test-Path 'C:\\Program Files (x86)\\Git\\cmd\\git.exe'; Test-Path 'C:\\Users\\Study\\AppData\\Local\\Programs\\Git\\cmd\\git.exe'",
+			"isBackground": false
+		},
+		{
+			"label": "install-git-user-scope",
+			"type": "shell",
+			"command": "winget install --id Git.Git --exact --scope user --silent --accept-package-agreements --accept-source-agreements",
+			"isBackground": false
+		},
+		{
+			"label": "verify-git-setup",
+			"type": "shell",
+			"command": "Get-Command git | Select-Object Name,Source; git --version; git -C 'd:\\leaflogic' status --short --branch; git -C 'd:\\leaflogic' remote -v; git config --global user.name; git config --global user.email",
+			"isBackground": false
+		},
+		{
+			"label": "locate-installed-git",
+			"type": "shell",
+			"command": "$paths = @('C:\\Users\\Study\\AppData\\Local\\Programs\\Git\\cmd\\git.exe','C:\\Users\\Study\\AppData\\Local\\Programs\\Git\\bin\\git.exe','C:\\Program Files\\Git\\cmd\\git.exe','C:\\Program Files (x86)\\Git\\cmd\\git.exe'); foreach ($p in $paths) { Write-Output \"$p : $(Test-Path $p)\" }; Get-ChildItem 'C:\\Users\\Study\\AppData\\Local\\Programs' -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName; Get-ChildItem 'C:\\Users\\Study\\AppData\\Local\\Microsoft\\WinGet\\Packages' -Directory -Filter 'Git.Git*' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName",
+			"isBackground": false
+		},
+		{
+			"label": "inspect-repository-state",
+			"type": "shell",
+			"command": "$git='C:\\Program Files\\Git\\cmd\\git.exe'; & $git --version; & $git -C 'd:\\leaflogic' status --short --branch; & $git -C 'd:\\leaflogic' remote -v; Write-Output ('name=' + (& $git config --global user.name)); Write-Output ('email=' + (& $git config --global user.email))",
+			"isBackground": false
+		},
+		{
+			"label": "prepare-repository-upload",
+			"type": "shell",
+			"command": "$git='C:\\Program Files\\Git\\cmd\\git.exe'; & $git -C 'd:\\leaflogic' init --initial-branch=main; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & $git -C 'd:\\leaflogic' remote add origin 'https://github.com/DharmikRavat/leaflogic-.git'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & $git -C 'd:\\leaflogic' add -A; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & $git -C 'd:\\leaflogic' status --short; & $git -C 'd:\\leaflogic' diff --cached --stat",
+			"isBackground": false
+		},
+		{
+			"label": "exclude-build-cache",
+			"type": "shell",
+			"command": "$git='C:\\Program Files\\Git\\cmd\\git.exe'; & $git -C 'd:\\leaflogic' rm --cached --frontend/ frontend/tsconfig.node.tsbuildinfo frontend/tsconfig.tsbuildinfo; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & $git -C 'd:\\leaflogic' add -A; & $git -C 'd:\\leaflogic' status --short; & $git -C 'd:\\leaflogic' diff --cached --name-only",
+			"isBackground": false
+		},
+		{
+			"label": "check-github-access",
+			"type": "shell",
+			"command": "$git='C:\\Program Files\\Git\\cmd\\git.exe'; & $git -C 'd:\\leaflogic' -c credential.interactive=never ls-remote origin; exit $LASTEXITCODE",
+			"isBackground": false
+		},
+		{
+			"label": "exclude-build-cache2",
+			"type": "shell",
+			"command": "$git='C:\\Program Files\\Git\\cmd\\git.exe'; & $git -C 'd:\\leaflogic' rm --cached -- frontend/tsconfig.node.tsbuildinfo frontend/tsconfig.tsbuildinfo; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & $git -C 'd:\\leaflogic' add -A; & $git -C 'd:\\leaflogic' status --short; & $git -C 'd:\\leaflogic' diff --cached --name-only",
+			"isBackground": false
+		}
+	]
+}
